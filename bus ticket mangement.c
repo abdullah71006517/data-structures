@@ -241,254 +241,248 @@ void printCurrentTime() {
 // Main function
 int main() {
     int seats[MAX_SEATS] = {0};
-    TicketStack ticketStack = {.top = 0}; // Initialize ticket stack
-    Ticket ticket; // Create a Ticket variable for booking
-    RouteNode* routeTree = NULL; // Pointer to the root of the route tree
-    FeedbackList feedbackList = {.count = 0}; // Initialize feedback list
+    TicketStack ticketStack = {.top = 0};
+    Ticket ticket;
+    RouteNode* routeTree = NULL;
+    FeedbackList feedbackList = {.count = 0};
 
-    // test
     routeTree = insertRoute(routeTree, "Dhaka", "Tangil", "10:00 AM");
-    routeTree = insertRoute(routeTree, "Dhaka", "Rajshahi", "011:00 AM");
+    routeTree = insertRoute(routeTree, "Dhaka", "Rajshahi", "11:00 AM");
     routeTree = insertRoute(routeTree, "Dhaka", "Sylhet", "12:00 AM");
     routeTree = insertRoute(routeTree, "Dhaka", "Khulna", "1:00 PM");
     routeTree = insertRoute(routeTree, "Dhaka", "Barisal", "12:00 PM");
 
+    int choice, userType;
+    char adminPassword[20];
+    const char* correctPassword = "420";
 
- int choice, userType;
-while(1){
-    printf("====== Bus Ticket Management System ======\n");
-    printf("1. Admin Login\n");
-    printf("2. User Login\n");
-    printf(" 3.exit\n ");
-    printf("Enter your choice: ");
-    scanf("%d", &userType);
-    getchar();  // Clear input buffer
+    while (1) {
+        printf("====== Bus Ticket Management System ======\n");
+        printf("1. Admin Login\n");
+        printf("2. User Login\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &userType);
+        getchar();
 
-if(userType==2){
+        if (userType == 1) {
+            printf("Enter admin password: ");
+            fgets(adminPassword, sizeof(adminPassword), stdin);
+            adminPassword[strcspn(adminPassword, "\n")] = 0; // Remove newline
 
-    do{
-        printf("\nMenu:\n");
-        printf("1. Display Routes\n");
-        printf("2. Book Ticket\n");
-        printf("3. Cancel Ticket\n");
-        printf("4. View Seats\n");
-        printf("5. Give Feedback\n");
-        printf("6. View Feedback\n");
-       printf("7. Check Ticket\n");
-       printf("8.about and support  \n");
-       printf("9.Exit ");
+            if (strcmp(adminPassword, correctPassword) != 0) {
+                printf("Incorrect password. Access denied.\n");
+                continue;
+            }
 
-  printf("Enter your choice: ");
-        scanf("%d", &choice);
-        getchar(); // Consume newline character left by scanf
+            do {
+                printf("\n====== Admin Menu ======\n");
+                printf("1. Add Route\n");
+                printf("2. Delete Route\n");
+                printf("3. View Feedback\n");
+                printf("4. Customer Information\n");
+                printf("5. View Accounting Info\n");
+                printf("6. Exit\n");
+                printf("Enter your choice: ");
+                scanf("%d", &choice);
+                getchar();
 
-        switch (choice) {
-            case 1: // Display Routes
-                if (routeTree == NULL) {
-                    printf("No routes available.\n");
-                } else {
-                     printCurrentTime();
-                    printf("Available Routes:\n");
-                     displayRoute(routeTree);
+                switch (choice) {
+                    case 1: {
+                        char origin[50], destination[50], schedule[20];
+                        printf("Enter origin: ");
+                        fgets(origin, sizeof(origin), stdin);
+                        origin[strcspn(origin, "\n")] = 0;
 
-                    printf("up coming routes  Routes:\n");
-                        displayRoutes(routeTree);
+                        printf("Enter destination: ");
+                        fgets(destination, sizeof(destination), stdin);
+                        destination[strcspn(destination, "\n")] = 0;
 
+                        printf("Enter schedule time: ");
+                        fgets(schedule, sizeof(schedule), stdin);
+                        schedule[strcspn(schedule, "\n")] = 0;
+
+                        routeTree = insertRoute(routeTree, origin, destination, schedule);
+                        printf("Route added successfully.\n");
+                        break;
+                    }
+
+                    case 2: {
+                        char origin[50], destination[50];
+                        printf("Enter origin: ");
+                        fgets(origin, sizeof(origin), stdin);
+                        origin[strcspn(origin, "\n")] = 0;
+
+                        printf("Enter destination: ");
+                        fgets(destination, sizeof(destination), stdin);
+                        destination[strcspn(destination, "\n")] = 0;
+
+                        routeTree = deleteRoute(routeTree, origin, destination);
+                        break;
+                    }
+                    case 3:
+                        viewFeedback(feedbackList);
+                        break;
+                    case 4:
+                        user_info(&ticketStack);
+                        break;
+                    case 5: {
+                        printf("- -- - - - - - - - - - - -");
+                        printf("\nTotal seats booked: %d", total_seat);
+                        printf("\nTotal revenue: %.2f\n", revenue);
+                        break;
+                    }
+                    case 6:
+                        break;
+                }
+            } while (choice != 6);
+        } else if (userType == 2) {
+            do {
+                printf("\nMenu:\n");
+                printf("1. Display Routes\n");
+                printf("2. Book Ticket\n");
+                printf("3. Cancel Ticket\n");
+                printf("4. View Seats\n");
+                printf("5. Give Feedback\n");
+                printf("6. View Feedback\n");
+                printf("7. Check Ticket\n");
+                printf("8. About and Support\n");
+                printf("9. Exit\n");
+                printf("Enter your choice: ");
+                scanf("%d", &choice);
+                getchar();
+
+                switch (choice) {
+                    case 1:
+                        if (routeTree == NULL) {
+                            printf("No routes available.\n");
+                        } else {
+                            printCurrentTime();
+                            printf("Available Routes:\n");
+                            displayRoute(routeTree);
+                            printf("Upcoming Routes:\n");
+                            displayRoutes(routeTree);
+                        }
+                        break;
+
+                    case 2: {
+                        printf("Enter passenger name: ");
+                        fgets(ticket.passengerName, sizeof(ticket.passengerName), stdin);
+                        ticket.passengerName[strcspn(ticket.passengerName, "\n")] = 0;
+
+                        printf("Enter phone number: ");
+                        fgets(ticket.phoneNumber, sizeof(ticket.phoneNumber), stdin);
+                        ticket.phoneNumber[strcspn(ticket.phoneNumber, "\n")] = 0;
+
+                        printf("\nSpecial Discount:\nBkash and Nogod have a 10%% discount.\n\n");
+
+                        printf("Enter payment type (e.g., Visa, Bkash, Nogod, Rocket): ");
+                        fgets(ticket.paymentType, sizeof(ticket.paymentType), stdin);
+                        ticket.paymentType[strcspn(ticket.paymentType, "\n")] = 0;
+
+                        printf("Enter ticket base price: ");
+                        scanf("%f", &ticket.basePrice);
+                        getchar();
+
+                        printf("Choose a seat (1 to %d): ", MAX_SEATS);
+                        scanf("%d", &ticket.seatNumber);
+                        getchar();
+
+                        if (ticket.seatNumber < 1 || ticket.seatNumber > MAX_SEATS || seats[ticket.seatNumber - 1] == 1) {
+                            printf("Seat is unavailable or invalid.\n");
+                            break;
+                        }
+
+                        seats[ticket.seatNumber - 1] = 1;
+                        ticket.ticketID = ticketStack.top + 2023 + 1;
+
+                        if (strcmp(ticket.paymentType, "Bkash") == 0 || strcmp(ticket.paymentType, "Nogod") == 0) {
+                            ticket.totalPrice = ticket.basePrice * 0.90;
+                            printf("10%% discount applied! Total price: %.2f\n", ticket.totalPrice);
+                        } else {
+                            ticket.totalPrice = ticket.basePrice;
+                            printf("No discount applied. Total price: %.2f\n", ticket.totalPrice);
+                        }
+
+                        push(&ticketStack, ticket);
+                        total_seat++;
+                        revenue += ticket.totalPrice;
+                        printf("Ticket booked successfully! Your Ticket ID is %d.\n", ticket.ticketID);
+                        printf("\n- - - - - - - - - - - RECEIPT - - - - - - - -\n");
+                        printf("Dear user,\nTicket booked successfully!\n");
+                        printf("Ticket ID: DB-%d, Seat Number: %d\n", ticket.ticketID, ticket.seatNumber);
+                        printf("Base Price: %.2f BDT\n", ticket.basePrice);
+                        printf("Discounted Price: %.2f BDT\n", ticket.totalPrice);
+                        printf("\nStay with our Dream Bus Service\n");
+                        printf("For any information, call +880-134-567-98\n");
+                        printf("Thank you! :)\n");
+                        printf("-- --- --- ---- ---- --- --- ---- --- --- -- --- --- - -- ");
+                        break;
+                    }
+
+                    case 3: {
+                        int ticketID;
+                        printf("Enter Ticket ID to cancel: ");
+                        scanf("%d", &ticketID);
+                        cancelTicket(&ticketStack, ticketID, seats);
+                        break;
+                    }
+
+                    case 4:
+                        displaySeats(seats, ROWS, COLS);
+                        break;
+
+                    case 5:
+                        giveFeedback(&feedbackList);
+                        break;
+
+                    case 6:
+                        checkTicket(&ticketStack);
+                        break;
+
+                    case 7: {
+                        printf("\n--- -- --- --- Dream Bus Service - - - - - - - -\n");
+                        printf("Counter: Counter #5, Dhaka Bus Terminal\n");
+                        printf("Mobile: +8801712345678\n");
+                        printf("Address: 123, Main Road, Dhaka, Bangladesh\n\n");
+
+                        printf("Routes and Schedules:\n");
+                        printf("-----------------------------------\n");
+                        printf("Route: Dhaka to Chittagong\n");
+                        printf("Schedule: 10:00 AM\n");
+                        printf("Counter: Counter #5, Dhaka Bus Terminal\n");
+                        printf("Mobile: +8801712345678\n");
+                        printf("Address: 123, Main Road, Dhaka, Bangladesh\n\n");
+
+                        printf("-----------------------------------\n");
+                        printf("Route: Dhaka to Sylhet\n");
+                        printf("Schedule: 2:00 PM\n");
+                        printf("Counter: Counter #5, Dhaka Bus Terminal\n");
+                        printf("Mobile: +8801712345678\n");
+                        printf("Address: 123, Main Road, Dhaka, Bangladesh\n\n");
+
+                        printf("-----------------------------------\n");
+                        printf("Route: Dhaka to Rajshahi\n");
+                        printf("Schedule: 5:00 PM\n");
+                        printf("Counter: Counter #5, Dhaka Bus Terminal\n");
+                        printf("Mobile: +8801712345678\n");
+                        printf("Address: 123, Main Road, Dhaka, Bangladesh\n");
+                    }
+                    break;
+
+                    case 8:
+                        break;
+
+                    default:
+                        printf("Invalid choice. Please try again.\n");
+                        break;
                 }
 
-                break;
-
-
-            case 2: { // Book Ticket
-    printf("Enter passenger name: ");
-    fgets(ticket.passengerName, sizeof(ticket.passengerName), stdin);
-    ticket.passengerName[strcspn(ticket.passengerName, "\n")] = 0; // Remove newline
-
-    printf("Enter phone number: ");
-    fgets(ticket.phoneNumber, sizeof(ticket.phoneNumber), stdin);
-    ticket.phoneNumber[strcspn(ticket.phoneNumber, "\n")] = 0; // Remove newline
-
-    // Display special discount information for Bkash and Nogod
-    printf("\nSpecial Discount:\nBkash and Nogod have a 10%% discount.\n\n");
-
-    printf("Enter payment type (e.g., Visa, Bkash, Nogod, Rocket): ");
-    fgets(ticket.paymentType, sizeof(ticket.paymentType), stdin);
-    ticket.paymentType[strcspn(ticket.paymentType, "\n")] = 0; // Remove newline
-
-    printf("Enter ticket base price: ");
-    scanf("%f", &ticket.basePrice);
-    getchar();
-
-    printf("Choose a seat (1 to %d): ", MAX_SEATS);
-    scanf("%d", &ticket.seatNumber);
-    getchar();
-
-    // Check if seat is available
-    if (ticket.seatNumber < 1 || ticket.seatNumber > MAX_SEATS || seats[ticket.seatNumber - 1] == 1) {
-        printf("Seat is unavailable or invalid.\n");
-        break;
-    }
-
-    seats[ticket.seatNumber - 1] = 1; // Mark seat as booked
-    ticket.ticketID = ticketStack.top + 2023+1; // Generate ticket ID
-
-    // Apply discount logic
-    if (strcmp(ticket.paymentType, "Bkash") == 0 || strcmp(ticket.paymentType, "Nogod") == 0) {
-        ticket.totalPrice = ticket.basePrice * 0.90; // Apply 10% discount
-        printf("10%% discount applied! Total price: %.2f\n", ticket.totalPrice);
-    } else {
-        ticket.totalPrice = ticket.basePrice;
-        printf("No discount applied. Total price: %.2f\n", ticket.totalPrice);
-    }
-
-    // Add the ticket to the stack
-    push(&ticketStack, ticket);
-    total_seat++;  // Increment total booked seat count
-    revenue += ticket.totalPrice;  // Add to total revenue
-   printf("Ticket booked successfully! Your Ticket ID is %d.\n", ticket.ticketID);
-                printf("\n- - - - - - - - - - - RECEIPT - - - - - - - -\n");
-    printf("Dear user,\nTicket booked successfully!\n");
-    printf("Ticket ID:DB- %d, Seat Number: %d\n", ticket.ticketID, ticket.seatNumber);
-    printf("Base Price: %.2f BDT\n", ticket.basePrice);
-    printf("Discounted Price: %.2f BDT\n", ticket.totalPrice);
-    printf("\nStay with our Dream Bus Service\n");
-    printf("For any information, call +880-134-567-98\n");
-    printf("Thank you! :)\n");
-    printf("-- --- --- ---- ---- --- --- ---- --- --- -- --- --- - -- ");
-    break;
-}
-
-
-
-
-            case 3: { // Cancel Ticket
-                int ticketID;
-                printf("Enter Ticket ID to cancel: ");
-                scanf("%d", &ticketID);
-                cancelTicket(&ticketStack, ticketID, seats); // Cancel ticket
-                break;
-            }
-
-            case 4: // View Seats
-                displaySeats(seats, ROWS, COLS);
-                break;
-
-            case 5: // Give Feedback
-                giveFeedback(&feedbackList);
-                break;
-             break;
-case 7:checkTicket(&ticketStack);
-                break;
-
-case 8: {
-    printf("\n--- -- --- ---dream Bus Service- - - - - - - -\n");
-    printf("Counter: Counter #5, Dhaka Bus Terminal\n");
-    printf("Mobile: +8801712345678\n");
-    printf("Address: 123, Main Road, Dhaka, Bangladesh\n\n");
-
-    printf("Routes and Schedules:\n");
-    printf("-----------------------------------\n");
-    printf("Route: Dhaka to Chittagong\n");
-    printf("Schedule: 10:00 AM\n");
-    printf("Counter: Counter #5, Dhaka Bus Terminal\n");
-    printf("Mobile: +8801712345678\n");
-    printf("Address: 123, Main Road, Dhaka, Bangladesh\n\n");
-
-    printf("-----------------------------------\n");
-    printf("Route: Dhaka to Sylhet\n");
-    printf("Schedule: 2:00 PM\n");
-    printf("Counter: Counter #5, Dhaka Bus Terminal\n");
-    printf("Mobile: +8801712345678\n");
-    printf("Address: 123, Main Road, Dhaka, Bangladesh\n\n");
-
-    printf("-----------------------------------\n");
-    printf("Route: Dhaka to Rajshahi\n");
-    printf("Schedule: 5:00 PM\n");
-    printf("Counter: Counter #5, Dhaka Bus Terminal\n");
-    printf("Mobile: +8801712345678\n");
-    printf("Address: 123, Main Road, Dhaka, Bangladesh\n");
-
-
-
- }
- break;
-
-
-case 9: break;
-
-            default:
-                printf("Invalid choice. Please try again.\n");break;
+            } while (choice != 9);
+        } else if (userType == 3) {
+            printf("-- Good bye --\n");
+            return 0;
         }
-
-    } while (choice != 9);
-}
-else if(userType==1){
-        do{   printf("\n====== Admin Menu ======\n");
-            printf("1. Add Route\n");
-            printf("2. Delete Route\n");
-            printf("3. View Feedback\n");
-            printf("4.customer  information \n");
-            printf("5. View Accounting Info\n");
-            printf("6. Exit\n");
-            printf("Enter your choice: ");
-            scanf("%d", &choice);
-            getchar();  // Clear input buffer
-
-            switch (choice) {
-                case 1: { // Add Route
-                char origin[50], destination[50], schedule[20];
-                printf("Enter origin: ");
-                fgets(origin, sizeof(origin), stdin);
-                origin[strcspn(origin, "case\n")] = 0; // Remove newline
-
-                printf("Enter destination: ");
-                fgets(destination, sizeof(destination), stdin);
-                destination[strcspn(destination, "\n")] = 0; // Remove newline
-
-                printf("Enter schedule time: ");
-                fgets(schedule, sizeof(schedule), stdin);
-                schedule[strcspn(schedule, "\n")] = 0; // Remove newline
-
-                routeTree = insertRoute(routeTree, origin, destination, schedule);
-                printf("Route added successfully.\n");
-                break;
-            }
-
-            case 2: { // Delete Route
-                char origin[50], destination[50];
-                printf("Enter origin: ");
-                fgets(origin, sizeof(origin), stdin);
-                origin[strcspn(origin, "\n")] = 0; // Remove newline
-
-                printf("Enter destination: ");
-                fgets(destination, sizeof(destination), stdin);
-                destination[strcspn(destination, "\n")] = 0; // Remove newline
-
-                routeTree = deleteRoute(routeTree, origin, destination);
-                break;
-            }
-            case 3: // View Feedback
-                viewFeedback(feedbackList);
-                break;
-                case 4:user_info(&ticketStack);break;
- case 5: {
-                    printf( "- -- - - - - - - - - - - -");
-                printf("\n total  seat book: %d",total_seat);
-                printf("\n total revenue : %.2f",revenue);
-                printf("\n");
-                } break;
-        case 6:break;
-
-}
-        } while(choice!=6);
-
-}
-else if(userType==3){
-    printf(" -- good bye - - - - ");
+    }
     return 0;
 }
-}
-    return 0;
-}
-
-
